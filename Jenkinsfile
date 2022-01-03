@@ -1,5 +1,5 @@
-def CONTAINER_NAME = "calculator"
 def ENV_NAME = getEnvName(env.BRANCH_NAME)
+def CONTAINER_NAME = "calculator-" + ENV_NAME
 def CONTAINER_TAG = getTag(env.BUILD_NUMBER, env.BRANCH_NAME)
 def HTTP_PORT = getHTTPPort(env.BRANCH_NAME)
 def EMAIL_RECIPIENTS = "philippe.guemkamsimo@gmail.com"
@@ -8,8 +8,8 @@ def EMAIL_RECIPIENTS = "philippe.guemkamsimo@gmail.com"
 node {
     try {
         stage('Initialize') {
-            def dockerHome = tool 'DockerLatest'
-            def mavenHome = tool 'MavenLatest'
+            def dockerHome = tool 'dockerlatest'
+            def mavenHome = tool 'mavenlatest'
             env.PATH = "${dockerHome}/bin:${mavenHome}/bin:${env.PATH}"
         }
 
@@ -23,7 +23,7 @@ node {
         }
 
         stage('Sonarqube Analysis') {
-            withSonarQubeEnv('SonarQubeLocalServer') {
+            withSonarQubeEnv('localhost-sonar') {
                 sh " mvn sonar:sonar -Dintegration-tests.skip=true -Dmaven.test.failure.ignore=true"
             }
             timeout(time: 1, unit: 'MINUTES') {
